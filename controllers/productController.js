@@ -1,0 +1,93 @@
+const Product = require("../models/productModel");
+const { getPostData } = require("../utils");
+
+async function getProducts(req, res) {
+  try {
+    const products = await Product.findAll();
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify(products));
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+async function getProduct(req, res) {
+  try {
+    const product = await Product.findById(id);
+    if (!product) {
+      res.writeHead(404, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ message: "Product Not Found" }));
+    } else {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify(product));
+    }
+  } catch (err) {
+    console.log(err);
+  }
+}
+async function createProduct(req, res) {
+  try {
+    const body = await getPostData(req);
+    const { title, description, price } = JSON.parse(body);
+
+    const product = {
+      title,
+      description,
+      price,
+    };
+
+    const newProduct = await Product.create(product);
+    res.writeHead(201, { "Content-Type": "application/json" });
+    return res.end(JSON.stringify(newProduct));
+  } catch (error) {
+    console.log(error);
+  }
+}
+module.exports = {
+  getProducts,
+  getProduct,
+  createProduct,
+};
+async function updateProduct(req, res) {
+  try {
+    const product = await Product.findById(id);
+    if (!product) {
+      res.writeHead(404, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ message: "Product Not Found" }));
+    } else {
+      const body = await getPostData(req);
+      const { title, description, price } = JSON.parse(body);
+
+      const product = {
+        title: title || product.title,
+        description: description || product.description,
+        price: price || product.price,
+      };
+      const updProduct = await Product.update(id, productData);
+
+      res.writeHead(200, { "Content-Type": "application/json" });
+      return res.end(JSON.stringify(updProduct));
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+if (!process.env.NTBA_FIX_319) {
+  try {
+    const msg =
+      "Automatic enabling of cancellation of promises is yourself.\n" +
+      "In the future, you will have to enable it yourself.\n" +
+      "See https://github.com/yagop/node-telegram-bot-api/issues/319.";
+    deprecate(msg);
+    Promise.config({
+      cancellation: true,
+    });
+  } catch (ex) {
+    const msg =
+      "error: Enabling Promise cancellation failed.\n" +
+      "   Temporary fix is to load/require this library as early as possible before using any.\n";
+
+    console.error(msg);
+    throw ex;
+  }
+}
